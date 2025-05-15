@@ -1,6 +1,6 @@
 [theme]
 primaryColor="#00000"
-backgroundColor="#003E1F"
+backgroundColor="transparent"
 secondaryBackgroundColor="#832232"
 textColor="#73BA9B"
 font="monospace"

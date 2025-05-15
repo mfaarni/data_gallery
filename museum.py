@@ -94,6 +94,32 @@ year_data = extract_year_data(filtered_df)
 
 tab1, tab2 = st.tabs(["Overview", "Search"])
 
+page_bg_img = '''<style>
+body {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-image: url("https://d3uvo7vkyyb63c.cloudfront.net/1/webp/1000/2494119.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(50, 69, 40, 0.90); /* semi-transparent black */
+  z-index: -1;
+}
+</style>
+
+'''
+
+st.markdown(page_bg_img, unsafe_allow_html=True)
 
 with tab1:
 
