@@ -28,15 +28,25 @@ def load_data():
         return pd.DataFrame(json.load(f))
 
 
-def extract_family_names(df, top_n=10):
+def extract_artist_names(df, top_n=16):
+    def get_full_name(people):
+        if isinstance(people, list) and people:
+            try:
+                return ", ".join([
+                    f"{p.get('firstName', '').strip()} {p.get('familyName', '').strip()}"
+                    for p in people if p.get('firstName') or p.get('familyName')
+                ])
+            
+            except:
+                return "Unknown"
     name_counts = (
         df['people']
-        .apply(lambda p: p[0]['familyName'] if isinstance(p, list) and p else None)
+        .apply(get_full_name)
         .value_counts()
         .head(top_n)
         .reset_index()
-    )
-    name_counts.columns = ["familyName", "count"]
+        )
+    name_counts.columns = ["artistName", "count"]
     return name_counts
 
 
@@ -87,7 +97,7 @@ filtered_df = df[df['responsibleOrganisation'].isin(selected_orgs)]
 
 
 images = extract_images(filtered_df)
-family_name_data = extract_family_names(filtered_df)
+artist_name_data = extract_artist_names(filtered_df)
 keyword_data = extract_keywords(filtered_df)
 year_data = extract_year_data(filtered_df)
 
@@ -154,7 +164,7 @@ with tab1:
             )
 
         st.plotly_chart(
-            px.bar(family_name_data, x="familyName", y="count", title="Top Artists", color_discrete_sequence=["#F0A202"])
+            px.bar(artist_name_data, x="artistName", y="count", title="Top Artists", color_discrete_sequence=["#F0A202"])
         )
 
         st.plotly_chart(
@@ -174,7 +184,7 @@ with tab2:
     search_artist = st.text_input("Search by Artist Name", "")
 
     def get_full_name(people):
-        if isinstance(people, list):
+        if isinstance(people, list) and people:
             try:
                 return ", ".join([
                     f"{p.get('firstName', '').strip()} {p.get('familyName', '').strip()}"
@@ -220,7 +230,15 @@ with tab2:
             with col1:
                 image_url = row['multimedia'][0]['jpg']['1000'] if isinstance(row['multimedia'], list) and row['multimedia'] and 'jpg' in row['multimedia'][0] else None
                 if image_url:
-                    st.image(image_url, width=150)
+                    # Title as caption (optional), image expands on click
+                    st.image(image_url, use_column_width=True, caption=None)
+
+                    # Title and Artist below image
+                    piece_titles = get_titles(row.get('title', {}))
+                    artist_full_name = get_full_name(row.get('people'))
+                    st.markdown(f"**Title:** {piece_titles}")
+                    st.markdown(f"**Artist:** {artist_full_name}")
+
             with col2:
                 st.markdown(f"### {get_titles(row.get('title', {}))}")
                 st.markdown(f"**Artist(s):** {get_full_name(row.get('people'))}")
